@@ -20,13 +20,18 @@ exports.postQuestionAnswer = async (req, res) => {
     // Check if questionnaireID, questionID and optionID exist in the Questionnaire collection
     const questionnaire = await Questionnaire.findOne({
       questionnaireID: questionnaireID,
-      "questions.qID": questionID,
+      questions: {
+        $elemMatch: {
+          qID: questionID,
+          options: { $elemMatch: { optID: optionID } },
+        },
+      },
     });
 
     if (!questionnaire) {
       return badRequest(
         res,
-        "Invalid request. QuestionnaireID, QuestionID, or OptionID do not exist in the database."
+        "Invalid request. QuestionnaireID, QuestionID and/or OptionID do not exist in the database."
       );
     }
 
@@ -64,4 +69,3 @@ exports.postQuestionAnswer = async (req, res) => {
     return badRequest(res, error);
   }
 };
-
